@@ -1,0 +1,162 @@
+{% extends 'shop/basic.html' %}
+{% block css %}
+        .col-md-3
+        {
+            display: inline-block;
+            margin-left: -4px; 
+        }
+        .col-md-3 img
+        {
+            height: 222px;
+            width: 277px;
+        }
+        .carousel-indicators .active
+        {
+            background-color: blue;
+        }
+        body .carousel-indicator li
+        {
+            background-color: blue;
+        }
+        body .carousel-indicator
+        {
+            bottom: 0;
+        }
+        body .carousel-control-prev-icon,body .carousel-control-next-icon
+        {
+            background-color: blue;
+        }
+        .carousel-control-next, .carousel-control-prev
+        {
+            top: auto;
+            bottom: auto;
+            padding-top: 211px;
+        }
+        body .no-padding
+        {
+            padding-left: 0;
+            padding-right: 0;
+        } 
+
+{% endblock %}
+
+{% block body %}
+{% load static %}
+    
+        <div class="container">
+
+            <!--SlideShow Start Here-->
+            {% for product,range,nslides in allprods %}
+        <h2 class="my-4">{{product.0.category}}</h2>
+        <div class="row">       
+        <div id="demo{{forloop.counter}}" class="col carousel slide my-3" data-ride="carousel">
+            <ul class="carousel-indicators">
+                <li data-target="#demo{{forloop.counter}}" data-slide-to="0" class="active"></li>
+
+                {% for i in range %}
+                <li data-target="#demo{{forloop.parentloop.counter}}" data-slide-to="{{i}}"></li>
+                {% endfor %}
+            </ul>
+
+            
+            <div class="container carousel-inner no-padding">
+            <div class="carousel-item active">    
+
+                {% for i in product %}        
+                
+                <div class="col-xs-3 col-sm-3 col-md-3">
+                    
+                        <div class="card align-items-center" style="width: 18rem;">
+                            <img class="card-img-top" src='/media/{{i.image}}' alt="Card image cap">
+                            <div class="card-body">
+                                <h5 class="card-title">{{i.product_name}}</h5>
+                                <p class="card-text">{{i.description|slice:"0:55"}}...</p>
+                                <span id="divpr{{i.id}}" class="divpr">
+                                    <button id="pr{{i.id}}"class="btn btn-primary cart">Add To Cart</button>
+                                </span>
+                                <a href="/shop/products/{{i.id}}"><button id="qv{{i.id}}"class="btn btn-primary cart">Quick View</button></a>
+                            </div>
+                        </div>
+                </div>
+
+                {% if forloop.counter|divisibleby:4 and forloop.counter > 0 and not forloop.last %}
+            </div>
+            <div class="carousel-item">
+                {% endif %}
+
+                {% endfor %}
+
+            </div>
+        </div>
+    </div>     
+        <!-- left-right control for slide -->
+        <a class="carousel-control-prev" href="#demo{{forloop.counter}}" data-slide="prev">
+            <span class="carousel-control-prev-icon"></span>    
+        </a>
+        <a class="carousel-control-next" href="#demo{{forloop.counter}}" data-slide="next">
+                <span class="carousel-control-next-icon"></span>    
+        </a>
+        </div>
+        {% endfor %}
+</div>        
+{% endblock %}
+
+{% block js %}
+<script>
+    
+    if(localStorage.getItem('cart')==null)
+    {
+        var cart={};
+    }
+    else
+    {
+        cart=JSON.parse(localStorage.getItem('cart'));
+        document.getElementById("cart").innerHTML=Object.keys(cart).length;
+        updateCart(cart); 
+    }
+$('.cart').click(function(){
+    
+    var idstr=this.id.toString();
+    if(cart[idstr]!=undefined)
+    {
+        cart[idstr]=cart[idstr]+1;
+    }
+    else
+    {
+        cart[idstr]=1;
+    }
+    updateCart(cart);
+    
+});
+$('#popcart').popover()
+document.getElementById("popcart").setAttribute('data-content','<h5>cart for your items</h5>');
+
+
+function updateCart(cart)
+{
+    for(var item in cart)
+    {
+        document.getElementById('div'+item).innerHTML="<button id='minus"+item+ "' class='btn btn-primary minus'>-</button> <span id='val"+item+"''>" +cart[item]+ "</span><button id='plus"+ item +"' class='btn btn-primary plus'> + </button>"; 
+    }
+    localStorage.setItem('cart',JSON.stringify(cart));
+    document.getElementById("cart").innerHTML=Object.keys(cart).length;
+    console.log(cart)
+}
+
+$('.divpr').on("click","button.minus",function(){
+    a=this.id.slice(7, );
+    cart['pr'+a]=cart['pr'+a]-1;
+    cart['pr'+a]=Math.max(0,cart['pr'+a]);
+    document.getElementById('valpr'+a),innerHTML=cart['pr'+a];
+    updateCart(cart);
+    
+});
+$('.divpr').on("click","button.plus",function(){
+    a=this.id.slice(6, );
+    cart['pr' + a]=cart['pr' + a] + 1;
+    document.getElementById('valpr'+a),innerHTML=cart['pr'+a];
+    updateCart(cart);
+});
+</script>
+{% endblock %}
+      
